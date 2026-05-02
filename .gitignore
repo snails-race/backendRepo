@@ -4,6 +4,9 @@ user-service/.gradle/
 user-service/build/
 .DS_Store
 
+# 환경변수 파일 (비밀번호 포함)
+.env
+
 # 환경설정 파일
 auth-service/src/main/resources/application.properties
 user-service/src/main/resources/application.properties

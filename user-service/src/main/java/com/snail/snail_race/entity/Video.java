@@ -1,4 +1,4 @@
-package com.snail.snailrace.entity;
+package com.snail.snail_race.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,9 +16,8 @@ public class Video {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = true)
-    private User user;
+    @Column(name = "user_id")
+    private Long userId;        // User 객체 대신 id만 저장
 
     @Column(name = "file_path")
     private String filePath;
