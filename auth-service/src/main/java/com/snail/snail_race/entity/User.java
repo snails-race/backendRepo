@@ -1,4 +1,4 @@
-package com.snail.snailrace.entity;
+package com.snail.snail_race.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

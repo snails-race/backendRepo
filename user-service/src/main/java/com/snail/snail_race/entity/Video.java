@@ -19,6 +19,12 @@ public class Video {
     @Column(name = "user_id")
     private Long userId;        // User 객체 대신 id만 저장
 
+    @Column(name = "file_name")
+    private String fileName;
+
+    @Column
+    private String type;
+
     @Column(name = "file_path")
     private String filePath;
 
@@ -36,4 +42,6 @@ public class Video {
         this.createdAt = LocalDateTime.now();
         this.status = "대기중";
     }
+    
+     
 }
