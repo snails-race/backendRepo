@@ -11,7 +11,6 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - mysql
       - redis
     environment:
       SPRING_DATASOURCE_URL: ${DB_URL}
@@ -30,23 +29,10 @@ services:
     command: ./gradlew bootRun
     ports:
       - "8081:8081"
-    depends_on:
-      - mysql
     environment:
       SPRING_DATASOURCE_URL: ${DB_URL}
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-
-  mysql:
-    image: mysql:8
-    container_name: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: test
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
 
   redis:
     image: redis:7
@@ -64,6 +50,3 @@ services:
     depends_on:
       - auth-service
       - user-service
-
-volumes:
-  mysql_data:
