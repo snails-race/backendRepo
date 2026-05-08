@@ -4,15 +4,12 @@ services:
       context: ./auth-service
       dockerfile: Dockerfile.dev
     container_name: auth-service
-    working_dir: /app
-    volumes:
-      - ./auth-service:/app
-    command: ./gradlew bootRun
     ports:
       - "8080:8080"
     depends_on:
       - redis
     environment:
+      SERVER_PORT: 8080
       SPRING_DATASOURCE_URL: ${DB_URL}
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
@@ -23,12 +20,8 @@ services:
       context: ./user-service
       dockerfile: Dockerfile.dev
     container_name: user-service
-    working_dir: /app
-    volumes:
-      - ./user-service:/app
-    command: ./gradlew bootRun
     ports:
-      - "8081:8081"
+      - "8081:8080"
     environment:
       SPRING_DATASOURCE_URL: ${DB_URL}
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}

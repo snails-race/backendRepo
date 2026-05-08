@@ -1,9 +1,21 @@
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:17-jdk AS builder
+
+WORKDIR /workspace
+
+COPY gradlew .
+COPY gradle ./gradle
+COPY build.gradle settings.gradle ./
+COPY src ./src
+
+RUN chmod +x ./gradlew
+RUN ./gradlew --no-daemon clean bootJar -x test
+
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-COPY . .
+COPY --from=builder /workspace/build/libs/*.jar app.jar
 
-RUN chmod +x ./gradlew
+EXPOSE 8080
 
-CMD ["./gradlew", "bootRun"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
