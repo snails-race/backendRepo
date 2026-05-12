@@ -1,39 +1,36 @@
-package com.snail.snail_race.entity;
+package com.snail.snail_race.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "videos")
 @Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Video {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id")
-    private Long userId;        // User 객체 대신 id만 저장
-
-    @Column(name = "file_path")
+    private Long userId;
+    private String fileName;
     private String filePath;
-
-    @Column
     private String url;
-
-    @Column
+    private String type;
     private String status;
-
-    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
-    public void prePersist() {
+    protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-        this.status = "대기중";
+        if (this.status == null) {
+            this.status = "PENDING";
+        }
     }
 }
