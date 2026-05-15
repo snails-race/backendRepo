@@ -47,11 +47,11 @@ public class AiAnalysisService {
         try {
             AiAnalysisResponse response = callAiServer("/deepfake/analyze", videoUrl, AiAnalysisResponse.class);
 
-            log.info("[AI] Deepfake response: videoId={}, requestId={}, decision={}, triggeredStage={}, latencyMs={}",
+            log.info("[AI] Deepfake response: videoId={}, requestId={}, decision={}, score={}, latencyMs={}",
                     video.getId(),
                     response != null ? response.getRequest_id() : null,
                     response != null ? response.getDecision() : null,
-                    response != null ? response.getTriggered_stage() : null,
+                    response != null ? response.getScore() : null,
                     response != null ? response.getLatency_ms() : null);
 
             Result result = findOrCreateResult(video);
@@ -75,25 +75,24 @@ public class AiAnalysisService {
         }
     }
 
+    /** v4: 단일 score 필드를 deepfakeScore로 사용 */
     private Float resolveDeepfakeScore(AiAnalysisResponse response) {
-        if (response == null) return null;
-        DeepfakeStageDto s1 = response.getStage1();
-        DeepfakeStageDto s2 = response.getStage2();
-        if (s1 != null && s2 != null) return (float) Math.max(s1.getProb(), s2.getProb());
-        if (s1 != null) return (float) s1.getProb();
-        if (s2 != null) return (float) s2.getProb();
-        return null;
+        if (response == null || response.getScore() == null) return null;
+        return response.getScore().floatValue();
     }
 
+    /** threshold, detect_conf, blur_var, n_frames_analyzed 요약 → xaiText */
     private String buildDeepfakeXaiText(AiAnalysisResponse response) {
         if (response == null) return null;
         DeepfakeEvidenceDto ev = response.getEvidence();
-        return String.format("category=%s, triggered_stage=%s, detect_conf=%s",
-                response.getCategory(),
-                response.getTriggered_stage(),
-                ev != null ? ev.getDetect_conf() : null);
+        return String.format("threshold=%.3f, detect_conf=%s, blur_var=%s, n_frames_analyzed=%s",
+                response.getThreshold() != null ? response.getThreshold() : 0.0,
+                ev != null ? ev.getDetect_conf() : null,
+                ev != null ? ev.getBlur_var() : null,
+                ev != null ? ev.getN_frames_analyzed() : null);
     }
 
+    /** evidence 핵심 + models + se_attention → suspiciousFrames JSON */
     private String buildDeepfakeSuspiciousFrames(AiAnalysisResponse response) {
         if (response == null || response.getEvidence() == null) return null;
         DeepfakeEvidenceDto ev = response.getEvidence();
@@ -101,7 +100,11 @@ public class AiAnalysisService {
         summary.put("suspect_frame_idx", ev.getSuspect_frame_idx());
         summary.put("face_bbox_in_frame_xyxy", ev.getFace_bbox_in_frame_xyxy());
         summary.put("detect_conf", ev.getDetect_conf());
+        summary.put("blur_var", ev.getBlur_var());
+        summary.put("n_frames_analyzed", ev.getN_frames_analyzed());
+        summary.put("models", response.getModels());
         summary.put("heatmaps", ev.getHeatmaps());
+        summary.put("se_attention", ev.getSe_attention());
         summary.put("regions", ev.getRegions());
         return toJson(summary);
     }
