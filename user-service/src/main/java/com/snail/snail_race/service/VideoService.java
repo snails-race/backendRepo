@@ -32,10 +32,7 @@ public class VideoService {
         Video savedVideo = videoRepository.save(video);
         VideoUploadResponse response = new VideoUploadResponse(savedVideo.getId(), savedVideo.getStatus());
 
-        if ("DEEPFAKE".equalsIgnoreCase(type)) {
-            aiAnalysisService.requestDeepfakeAnalysis(savedVideo, fileUrl);
-        }
-
+        triggerAnalysis(savedVideo, fileUrl, type);
         return response;
     }
 
@@ -51,11 +48,16 @@ public class VideoService {
         Video savedVideo = videoRepository.save(video);
         VideoUploadResponse response = new VideoUploadResponse(savedVideo.getId(), savedVideo.getStatus());
 
-        if ("DEEPFAKE".equalsIgnoreCase(type)) {
-            aiAnalysisService.requestDeepfakeAnalysis(savedVideo, url);
-        }
-
+        triggerAnalysis(savedVideo, url, type);
         return response;
+    }
+
+    private void triggerAnalysis(Video video, String videoUrl, String type) {
+        if ("DEEPFAKE".equalsIgnoreCase(type)) {
+            aiAnalysisService.requestDeepfakeAnalysis(video, videoUrl);
+        } else if ("T2V".equalsIgnoreCase(type)) {
+            aiAnalysisService.requestT2vAnalysis(video, videoUrl);
+        }
     }
 
     @Transactional(readOnly = true)
