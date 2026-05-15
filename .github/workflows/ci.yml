@@ -17,18 +17,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service:
-          - auth-service
-          - user-service
+        include:
+          - service: auth-service
+            java-version: '17'
+          - service: user-service
+            java-version: '21'
 
     steps:
       - name: 코드 가져오기
         uses: actions/checkout@v4
 
-      - name: JDK 17 설치
+      - name: JDK ${{ matrix.java-version }} 설치
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: ${{ matrix.java-version }}
           distribution: 'temurin'
 
       - name: Gradle 캐시 설정
