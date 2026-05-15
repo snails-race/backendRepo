@@ -2,6 +2,7 @@ package com.snail.snail_race.service;
 
 import com.snail.snail_race.domain.Video;
 import com.snail.snail_race.dto.VideoUploadResponse;
+import com.snail.snail_race.exception.VideoNotFoundException;
 import com.snail.snail_race.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ public class VideoService {
 
     private final VideoRepository videoRepository;
     private final S3Service s3Service;
+    private final AiAnalysisService aiAnalysisService;
 
     public VideoUploadResponse uploadVideo(Long userId, String type, MultipartFile file) {
         String fileUrl = s3Service.uploadFile(file);
@@ -28,6 +30,38 @@ public class VideoService {
         video.setStatus("PENDING");
 
         Video savedVideo = videoRepository.save(video);
-        return new VideoUploadResponse(savedVideo.getId(), savedVideo.getStatus());
+        VideoUploadResponse response = new VideoUploadResponse(savedVideo.getId(), savedVideo.getStatus());
+
+        if ("DEEPFAKE".equalsIgnoreCase(type)) {
+            aiAnalysisService.requestDeepfakeAnalysis(savedVideo, fileUrl);
+        }
+
+        return response;
+    }
+
+    public VideoUploadResponse saveVideoUrl(Long userId, String url, String type) {
+        Video video = new Video();
+        video.setUserId(userId);
+        video.setFileName(null);
+        video.setFilePath(url);
+        video.setUrl(url);
+        video.setType(type);
+        video.setStatus("PENDING");
+
+        Video savedVideo = videoRepository.save(video);
+        VideoUploadResponse response = new VideoUploadResponse(savedVideo.getId(), savedVideo.getStatus());
+
+        if ("DEEPFAKE".equalsIgnoreCase(type)) {
+            aiAnalysisService.requestDeepfakeAnalysis(savedVideo, url);
+        }
+
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public VideoUploadResponse getVideoStatus(Long videoId) {
+        Video video = videoRepository.findById(videoId)
+                .orElseThrow(() -> new VideoNotFoundException(videoId));
+        return new VideoUploadResponse(video.getId(), video.getStatus());
     }
 }
