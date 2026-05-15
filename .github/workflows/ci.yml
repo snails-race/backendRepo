@@ -62,7 +62,8 @@ jobs:
           script: |
             cd ~/projects/backendRepo
 
-            git pull origin main
+            git fetch origin
+            git reset --hard origin/main
 
             docker-compose down
 
