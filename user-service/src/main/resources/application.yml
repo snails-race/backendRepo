@@ -26,4 +26,4 @@ app:
 
 ai:
   server:
-    base-url: ${AI_SERVER_BASE_URL:http://ceprj.gachon.ac.kr:60006}
+    base-url: ${AI_SERVER_BASE_URL:http://192.9.202.17:60006}
